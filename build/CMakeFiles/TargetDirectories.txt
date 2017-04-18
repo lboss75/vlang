@@ -1,0 +1,12 @@
+D:/projects/vlang/build/CMakeFiles/ALL_BUILD.dir
+D:/projects/vlang/build/CMakeFiles/ZERO_CHECK.dir
+D:/projects/vlang/build/src/vscript/CMakeFiles/vscript.dir
+D:/projects/vlang/build/src/vscript/CMakeFiles/ALL_BUILD.dir
+D:/projects/vlang/build/src/vruntime/CMakeFiles/vruntime.dir
+D:/projects/vlang/build/src/vruntime/CMakeFiles/ALL_BUILD.dir
+D:/projects/vlang/build/src/vcompiler/CMakeFiles/vcompiler.dir
+D:/projects/vlang/build/src/vcompiler/CMakeFiles/ALL_BUILD.dir
+D:/projects/vlang/build/src/vrt_system_package/CMakeFiles/vrt_system_package.dir
+D:/projects/vlang/build/src/vrt_system_package/CMakeFiles/ALL_BUILD.dir
+D:/projects/vlang/build/src/v/CMakeFiles/v.dir
+D:/projects/vlang/build/src/v/CMakeFiles/ALL_BUILD.dir
