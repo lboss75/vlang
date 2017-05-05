@@ -9,6 +9,4 @@
 #include <vector>
 #include <functional>
 
-#include "vds_core.h"
-
 #endif//__STDAFX_H_

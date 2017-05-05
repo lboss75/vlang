@@ -1,9 +1,7 @@
 #include "stdafx.h"
 #include "vruntime_machine.h"
 #include "vrt_package.h"
-#include "vrt_context.h"
 #include "vrt_try_context.h"
-#include "vrt_method_context.h"
 #include "vrt_statement.h"
 #include "vrt_variable.h"
 #include "vrt_json.h"
@@ -224,52 +222,52 @@ bool vds::vruntime_machine::match_parameters(
   return true;
 }
 
-void vds::vruntime_machine::create_object(
-  const std::function<void(const std::shared_ptr<vrt_object> &)> & done,
-  const error_handler_t & on_error,
-  const vrt_constructor * constructor,
-  const std::map<std::string, std::shared_ptr<vrt_object>> & arguments
-)
-{
-  std::shared_ptr<vrt_object> pthis(new vrt_object(constructor->declaring_type()));
-
-  std::shared_ptr<vrt_context> context(new vrt_context(this,
-    [done, pthis](vrt_context & context) {
-      done(pthis);
-    },
-    on_error));
-
-  if(context->invoke(
-    pthis,
-    constructor,
-    arguments)){
-    context->execute_continue();
-  }
-}
-
-void vds::vruntime_machine::invoke(
-  const std::function<void(const std::shared_ptr<vrt_object> &)> & done,
-  const error_handler_t & on_error,
-  const std::shared_ptr<vrt_object> & pthis,
-  const vrt_callable * method,
-  const std::map<std::string, std::shared_ptr<vrt_object>> & arguments
-)
-{
-  std::shared_ptr<vrt_context> context(new vrt_context(this,
-    [done, pthis, method](vrt_context & context) {
-      std::shared_ptr<vrt_object> value;
-      if(nullptr != method->get_result_type()){
-        value = context.pop();
-      }
-    
-      done(value);
-  },
-    on_error));
-
-  if(context->invoke(
-    pthis,
-    method,
-    arguments)) {
-    context->execute_continue();
-  }
-}
+//void vds::vruntime_machine::create_object(
+//  const std::function<void(const std::shared_ptr<vrt_object> &)> & done,
+//  const error_handler_t & on_error,
+//  const vrt_constructor * constructor,
+//  const std::map<std::string, std::shared_ptr<vrt_object>> & arguments
+//)
+//{
+//  std::shared_ptr<vrt_object> pthis(new vrt_object(constructor->declaring_type()));
+//
+//  std::shared_ptr<vrt_context> context(new vrt_context(this,
+//    [done, pthis](vrt_context & context) {
+//      done(pthis);
+//    },
+//    on_error));
+//
+//  if(context->invoke(
+//    pthis,
+//    constructor,
+//    arguments)){
+//    context->execute_continue();
+//  }
+//}
+//
+//void vds::vruntime_machine::invoke(
+//  const std::function<void(const std::shared_ptr<vrt_object> &)> & done,
+//  const error_handler_t & on_error,
+//  const std::shared_ptr<vrt_object> & pthis,
+//  const vrt_callable * method,
+//  const std::map<std::string, std::shared_ptr<vrt_object>> & arguments
+//)
+//{
+//  std::shared_ptr<vrt_context> context(new vrt_context(this,
+//    [done, pthis, method](vrt_context & context) {
+//      std::shared_ptr<vrt_object> value;
+//      if(nullptr != method->get_result_type()){
+//        value = context.pop();
+//      }
+//    
+//      done(value);
+//  },
+//    on_error));
+//
+//  if(context->invoke(
+//    pthis,
+//    method,
+//    arguments)) {
+//    context->execute_continue();
+//  }
+//}

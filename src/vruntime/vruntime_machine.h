@@ -1,12 +1,9 @@
 #ifndef __VRUNTIME_MACHINE_H_
 #define __VRUNTIME_MACHINE_H_
 
-#include "func_utils.h"
-
 namespace vds {
   class vrt_callable;
   class vrt_class;
-  class vrt_context;
   class vrt_constructor;
   class vrt_injection;
   class vrt_json_value;
@@ -44,21 +41,6 @@ namespace vds {
     bool match_parameters(
       const std::vector<std::unique_ptr<vrt_parameter>> & method_parameters,
       const std::map<std::string, const vrt_type *> & argument_types) const;
-
-    void create_object(
-      const std::function<void(const std::shared_ptr<vrt_object> &)> & done,
-      const error_handler_t & on_error,
-      const vrt_constructor * constructor,
-      const std::map<std::string, std::shared_ptr<vrt_object>> & arguments
-    );
-    
-    void invoke(
-      const std::function<void(const std::shared_ptr<vrt_object> &)> & done,
-      const error_handler_t & on_error,
-      const std::shared_ptr<vrt_object> & pthis,
-      const vrt_callable * method,
-      const std::map<std::string, std::shared_ptr<vrt_object>> & arguments
-    );
 
   private:
     friend class vpackage_compiler;

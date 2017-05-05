@@ -5,6 +5,7 @@ namespace vds {
   class vmethod_compiler;
   class vrt_package;
   class vrt_type;
+  class vrt_class;
   
   class name_resolver
   {

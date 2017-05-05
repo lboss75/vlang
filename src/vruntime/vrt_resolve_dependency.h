@@ -13,8 +13,6 @@ namespace vds {
       const vrt_type * interface_type
     );
 
-    bool execute(vrt_context & context) const override;
-
   private:
     const vrt_type * interface_type_;
   };

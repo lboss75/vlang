@@ -6,7 +6,6 @@
 
 namespace vds {
   class vrt_class;
-  class vrt_context;
   class vrt_json_object;
   class vrt_object;
   class vrt_statement;
@@ -96,20 +95,6 @@ namespace vds {
       const vrt_type * declaring_type,
       const std::string & name
     );
-    
-    bool invoke(
-      vrt_context & context,
-      const std::shared_ptr<vrt_object> & pthis,
-      const std::map<std::string, std::shared_ptr<vrt_object>> & arguments
-      ) const;
-    
-  private:
-    friend class vpackage_compiler;
-    std::function<
-      bool (
-        vrt_context & context,
-        const std::shared_ptr<vrt_object> & pthis,
-        const std::map<std::string, std::shared_ptr<vrt_object>> & arguments)> impl_;
   };
   
   class vrt_method : public vrt_callable
@@ -131,7 +116,6 @@ namespace vds {
   private:
     friend class vmethod_compiler;
     friend class vpackage_compiler;
-    friend class vrt_context;
     friend class vrt_method_context;
 
     const vrt_source_file * file_;
@@ -178,7 +162,11 @@ namespace vds {
     const vrt_type * get_property_type() const {
       return this->property_type_;
     }
-    
+
+    const std::map<std::string, std::unique_ptr<vrt_callable>> & methods() const {
+      return this->methods_;
+    }
+
   private:
     friend class vpackage_compiler;
     const vrt_type * property_type_;
@@ -201,6 +189,11 @@ namespace vds {
     }
 
     std::string full_name() const;
+
+
+    static vrt_type buildin_int;
+    static vrt_type buildin_char;
+    static vrt_type buildin_string;
 
   private:
     const vrt_package * package_;

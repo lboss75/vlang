@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "vrt_injection.h"
 #include "vrt_package.h"
-#include "vrt_context.h"
 #include "vrt_injection_lifetime.h"
 
 void vds::vrt_injection::register_transient(const vrt_type * service_interface, const vrt_type * implementation)

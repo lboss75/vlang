@@ -38,73 +38,70 @@ static bool ends_with(const std::string & str, const char * suffix)
 
 int vds::vcompiler::run(int argc, const char** argv)
 {
-  std::unique_ptr<vruntime_machine> machine(new vruntime_machine());
-  for(int i = 1; i < argc; ++i){
-    vsyntax t;
-    
-    vfolder::enumerate(
-      argv[i],
-      [&t](const std::string & filename, bool is_folder) {
-        if(!is_folder && ends_with(filename, ".v")) {
-          std::cout << "compiling " << filename << "\n";
-          text_stream s(filename);
-          
-          static const char * operators[] =
-          {
-            "/", "//", "/*",
-            ".",
-            "{", "}",
-            "[", "]",
-            "(", ")",
-            ":",
-            ",",
-            ";",
-            "=", "==",
-            "+", "-",
-            nullptr
-          };
+  vsyntax t;
 
-          vtokenizer p(s, operators);
-          
-          static const char * keywords[] = {
-            "class",
-            "else",
-            "for",
-            "foreach",
-            "function",
-            "dependency",
-            "external",
-            "if",
-            "in",
-            "interface",
-            "namespace",
-            "new",
-            "override",
-            "package",
-            "private",
-            "property",
-            "public",
-            "return",
-            "static",
-            "using",
-            "var",
-            "void",
-            "while",
-            nullptr
-          };
-          vlexer l(p, keywords);
-          
-          t.parse(l);
-        }
-        
-        return true;          
-      }
-    );
-    
-    vrt_external_method_resolver resolver;
-    auto package = vpackage_compiler::compile(machine.get(), t, resolver);
-   
+  std::unique_ptr<vruntime_machine> machine(new vruntime_machine());
+  for (int i = 1; i < argc; ++i) {
+    auto filename = argv[i];
+    std::cout << "compiling " << filename << "\n";
+    text_stream s(filename);
+
+    static const char * operators[] =
+    {
+      "/", "//", "/*",
+      ".",
+      "{", "}",
+      "[", "]",
+      "(", ")",
+      ":",
+      ",",
+      ";",
+      "=", "==",
+      "+", "-",
+      "?",
+      nullptr
+    };
+
+    vtokenizer p(s, operators);
+
+    static const char * keywords[] = {
+      "class",
+      "else",
+      "for",
+      "foreach",
+      "function",
+      "dependency",
+      "external",
+      "if",
+      "in",
+      "interface",
+      "namespace",
+      "new",
+      "override",
+      "package",
+      "private",
+      "property",
+      "public",
+      "return",
+      "static",
+      "using",
+      "var",
+      "void",
+      "while",
+      nullptr
+    };
+    vlexer l(p, keywords);
+
+    t.parse(l);
   }
+
+
+  auto package = vpackage_compiler::compile(machine.get(), t);
+
+  cpp_generator generator;
+
+  generator.generate(package);
+  
 
   return 0;
 }

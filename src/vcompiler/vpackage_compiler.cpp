@@ -6,17 +6,15 @@
 #include "name_resolver.h"
 #include "vruntime_machine.h"
 #include "vrt_variable.h"
-#include "vrt_external_method_resolver.h"
 #include "vtype_resolver.h"
 #include "vrt_resolve_dependency.h"
 
 vds::vrt_package * vds::vpackage_compiler::compile(
   vds::vruntime_machine * machine,
-  const vds::vsyntax & source,
-  const vrt_external_method_resolver & external_method_resolver
+  const vds::vsyntax & source
 )
 {
-  return vpackage_compiler(machine, source).compile(source, external_method_resolver);
+  return vpackage_compiler(machine, source).compile(source);
 }
 
 vds::vpackage_compiler::vpackage_compiler(
@@ -30,8 +28,7 @@ vds::vpackage_compiler::vpackage_compiler(
 }
 
 vds::vrt_package * vds::vpackage_compiler::compile(
-  const vsyntax & source,
-  const vrt_external_method_resolver & external_method_resolver)
+  const vsyntax & source)
 {
   auto result = this->machine_->create_package(this->package_->name.token.value);
   std::unique_ptr<vrt_source_file> rt_file(new vrt_source_file(this->package_file_->file_path()));
@@ -85,8 +82,7 @@ vds::vrt_package * vds::vpackage_compiler::compile(
                 new compiled_external_method(
                   type_resolver,
                   rt_method.get(),
-                  method.get(),
-                  external_method_resolver)
+                  method.get())
                 ));
 
             rt_class->methods_.push_back(std::move(rt_method));
@@ -301,10 +297,8 @@ void vds::vpackage_compiler::compiled_method::compile()
 vds::vpackage_compiler::compiled_external_method::compiled_external_method(
   const std::shared_ptr<vtype_resolver> & resolver,
   vrt_external_method * compiled,
-  vmethod * original,
-  const vrt_external_method_resolver & external_method_resolver)
-  : external_method_resolver_(external_method_resolver),
-  type_resolver_(resolver), compiled_(compiled), original_(original)
+  vmethod * original)
+  : type_resolver_(resolver), compiled_(compiled), original_(original)
 {
 }
 
@@ -315,8 +309,8 @@ void vds::vpackage_compiler::compiled_external_method::resolve_types()
 
 void vds::vpackage_compiler::compiled_external_method::compile()
 {
-  this->compiled_->impl_ = this->external_method_resolver_.resolve(this->compiled_);
 }
+
 /////////////////////////////////////////////////////////////////////////////////////
 vds::vpackage_compiler::compiled_class::compiled_class(
   const std::shared_ptr< vds::vtype_resolver >& resolver,

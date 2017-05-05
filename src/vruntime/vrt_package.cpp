@@ -38,6 +38,9 @@ size_t vds::vrt_callable::get_parameter_index(const std::string & name) const
   return (size_t)-1;
 }
 
+vds::vrt_type vds::vrt_type::buildin_int(nullptr, "int");
+vds::vrt_type vds::vrt_type::buildin_char(nullptr, "char");
+vds::vrt_type vds::vrt_type::buildin_string(nullptr, "string");
 
 vds::vrt_type::vrt_type(const vrt_package * package, const std::string& name)
 : package_(package), name_(name)
@@ -127,17 +130,6 @@ vds::vrt_external_method::vrt_external_method(
 {
 }
 
-bool vds::vrt_external_method::invoke(
-  vrt_context & context,
-  const std::shared_ptr<vrt_object>& pthis,
-  const std::map<std::string, std::shared_ptr<vrt_object>>& arguments) const
-{
-  return this->impl_(
-    context,
-    pthis,
-    arguments);
-}
-
 vds::vrt_constructor::vrt_constructor(
   const vds::vrt_source_file* file,
   int line,
@@ -146,9 +138,7 @@ vds::vrt_constructor::vrt_constructor(
 )
 : vrt_method(file, line, column, declaring_type, std::string())
 {
-
 }
-
 
 const std::string & vds::vrt_property::verb_get()
 {

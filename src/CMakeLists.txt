@@ -1,5 +1,4 @@
-add_subdirectory(vscript)
 add_subdirectory(vruntime)
 add_subdirectory(vcompiler)
-add_subdirectory(vrt_system_package)
+add_subdirectory(v2cpp)
 add_subdirectory(v)

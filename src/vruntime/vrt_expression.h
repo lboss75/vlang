@@ -5,7 +5,6 @@
 
 namespace vds {
   class vrt_callable;
-  class vrt_context;
   class vrt_constructor;
   class vrt_property;
   class vrt_source_file;
@@ -31,9 +30,6 @@ namespace vds {
       const std::list<std::string> & arguments
     );
     
-    bool execute(
-      vrt_context & context) const override;
-
   private:
     const vrt_constructor * constructor_;
     std::list<std::string> arguments_;
@@ -60,8 +56,6 @@ namespace vds {
       int column,
       size_t index);
     
-    bool execute(
-      vrt_context & context) const override;
   private:
     size_t index_;
   };
@@ -74,9 +68,6 @@ namespace vds {
       int line,
       int column,
       const vrt_property * property);
-    
-    bool execute(
-      vrt_context & context) const override;
     
   private:
     const vrt_property * property_;
@@ -91,9 +82,7 @@ namespace vds {
       int column,
       const std::string & value);
     
-    bool execute(
-      vrt_context & context) const override;
-    
+   
   private:
     std::string value_;
   };
@@ -106,9 +95,6 @@ namespace vds {
       int line,
       int column,
       const std::string & value);
-    
-    bool execute(
-      vrt_context & context) const override;
     
   private:
     std::string value_;
@@ -124,9 +110,6 @@ namespace vds {
       const vrt_callable * method,
       const std::list<std::string> & arguments
     );
-
-    bool execute(
-      vrt_context & context) const override;
 
   private:
     const vrt_callable * method_;

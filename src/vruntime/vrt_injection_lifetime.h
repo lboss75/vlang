@@ -4,7 +4,6 @@
 #include "vrt_scope.h"
 
 namespace vds {
-  class vrt_context;
   class vrt_object;
   class vrt_type;
 

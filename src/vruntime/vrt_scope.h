@@ -7,7 +7,6 @@ namespace vds {
   class vrt_type;
   class vruntime_machine;
   class vrt_variable;
-  class vrt_context;
 
   class vrt_scope
   {

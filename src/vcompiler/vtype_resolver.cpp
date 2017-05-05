@@ -19,6 +19,10 @@ void vds::vtype_resolver::resolve_types(vrt_callable * target, const vmethod * s
   if(nullptr != source->result_type()){
     target->result_type_ = this->resolve_type(source->result_type());
   }
+  else {
+    target->result_type_ = nullptr;
+  }
+
   for(const std::unique_ptr<vmethod_parameter> & p : source->parameters()){
     target->parameters_.push_back(
       std::unique_ptr<vrt_parameter>(
@@ -34,6 +38,16 @@ void vds::vtype_resolver::resolve_types(vrt_callable * target, const vmethod * s
 
 const vds::vrt_type * vds::vtype_resolver::resolve_type(const std::string& name, bool throw_error)
 {
+  if (name == "int") {
+    return &vrt_type::buildin_int;
+  }
+  if (name == "char") {
+    return &vrt_type::buildin_char;
+  }
+  if (name == "string") {
+    return &vrt_type::buildin_string;
+  }
+
   for(const std::string & ns : this->namespaces_) {
     auto result = this->resolver_.resolve_type(ns + "." + name);
     if(result){

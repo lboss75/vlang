@@ -634,33 +634,36 @@ void vds::vfile_syntax::parse_property(const std::unique_ptr<vds::vproperty> & p
   if(this->optional(":")){
     p->result_type_ = this->parse_type();
   }
-  this->require("{");
-  while(!this->optional("}")){
-    auto name = this->parse_name();
-    vproperty_verb * verb;
-    if(this->optional(";")){
-      verb = new vproperty_verb(
-        *this->file_.get(),
-        name.token.line,
-        name.token.column,
-        name.token.value);
-    } else {
-      auto body = this->parse_block_statement();
-      verb = new vproperty_verb(
-        *this->file_.get(),
-        name.token.line,
-        name.token.column,
-        name.token.value,
-        body.release());
+  if (this->optional("{")) {
+    while (!this->optional("}")) {
+      auto name = this->parse_name();
+      vproperty_verb * verb;
+      if (this->optional(";")) {
+        verb = new vproperty_verb(
+          *this->file_.get(),
+          name.token.line,
+          name.token.column,
+          name.token.value);
+      }
+      else {
+        auto body = this->parse_block_statement();
+        verb = new vproperty_verb(
+          *this->file_.get(),
+          name.token.line,
+          name.token.column,
+          name.token.value,
+          body.release());
+      }
+
+      p->verbs_[name.token.value].reset(verb);
     }
-    
-    p->verbs_[name.token.value].reset(verb);
   }
-  
-  if(this->optional("=")){
+  else if(this->optional("=")){
     p->init_ = this->parse_expression();
   }
-  
+  else {
+    this->require(";");
+  }
   if(!p->result_type_) {
     if(!p->init_){
       throw new compile_error(

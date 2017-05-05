@@ -12,8 +12,6 @@
 #include "vtokenizer.h"
 #include "vlexer.h"
 #include "vsyntax.h"
-#include "vfolder.h"
-#include "vrt_external_method_resolver.h"
 
 
 #endif//__VCOMPILER_H_

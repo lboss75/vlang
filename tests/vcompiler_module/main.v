@@ -1,17 +1,24 @@
 namespace v {
-	application vcompiler {
+	class vcompiler {
 
 		argument_set default {
 			argument() foldername[] modules;
 		}
 
-		void main(){
+		public static main() : void {
 			for(var m in this.modules){
 				compile_module(m);
 			}
 		}
 		
-		void 
+		compile(input:file) : void {
+			for(;;){
+				var token = input.get_token();
+				if(!token){
+					break;
+				}
+			}
+		}
 		
 	}
 }

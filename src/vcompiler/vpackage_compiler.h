@@ -8,7 +8,6 @@
 
 namespace vds {
   class vruntime_machine;
-  class vrt_external_method_resolver;
   class vtype_resolver;
   
   class vpackage_compiler
@@ -16,8 +15,7 @@ namespace vds {
   public:
     static vrt_package * compile(
       vruntime_machine * machine,
-      const vsyntax & source,
-      const vrt_external_method_resolver & external_method_resolver
+      const vsyntax & source
     );
 
   private:
@@ -76,14 +74,12 @@ namespace vds {
       compiled_external_method(
         const std::shared_ptr<vtype_resolver> & resolver,
         vrt_external_method * compiled,
-        vmethod * original,
-        const vrt_external_method_resolver & external_method_resolver);
+        vmethod * original);
 
       void resolve_types() override;
       void compile() override;
 
     private:
-      const vrt_external_method_resolver & external_method_resolver_;
       std::shared_ptr<vtype_resolver> type_resolver_;
       vrt_external_method * compiled_;
       vmethod * original_;
@@ -113,8 +109,7 @@ namespace vds {
     void load_dependencies();
 
     vrt_package * compile(
-      const vds::vsyntax & source,
-      const vrt_external_method_resolver & external_method_resolver
+      const vds::vsyntax & source
     );
    
     static vrt_json_value * compile_json(
