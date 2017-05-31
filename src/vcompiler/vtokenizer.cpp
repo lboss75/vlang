@@ -112,7 +112,7 @@ const vds::vtoken& vds::vtokenizer::next()
      }
      
      if(value.empty()) {
-       this->compile_error("Invalid token");
+       this->compile_error(std::string("Invalid token ") + this->next_symbol().symbol);
      }
      
      //Inline comment

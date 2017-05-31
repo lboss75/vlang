@@ -780,6 +780,20 @@ std::unique_ptr<vds::vexpression> vds::vfile_syntax::parse_expression3()
     this->parse_invoke_arguments(exp->arguments_);
     return std::unique_ptr<vds::vexpression>(exp.release());
   }
+  
+  for(;;){
+    if (this->optional("!", LT_OPERATOR)) {
+      return std::unique_ptr<vds::vexpression>(
+        new vprefix_exptession(
+        *this->file_.get(),
+        this->next_lex_.token.line,
+        this->next_lex_.token.column,
+        "!",
+        this->parse_expression2().release()));
+    }
+    
+    break;
+  }
 
   return this->parse_expression2();
 }
@@ -1041,6 +1055,17 @@ vds::vreturn_statement::vreturn_statement(
   int column,
   vexpression * body)
 : vstatement(owner, line, column), body_(body)
+{
+}
+
+vds::vprefix_exptession::vprefix_exptession(
+  const vds::vfile& owner,
+  int line,
+  int column,
+  const std::string& op,
+  vds::vexpression* right)
+: vexpression(owner, line, column),
+op_(op), right_(right)
 {
 }
 

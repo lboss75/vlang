@@ -142,6 +142,31 @@ namespace vds {
     std::string name_;
     std::unique_ptr<vexpression> object_;
   };
+  
+  class vprefix_exptession : public vexpression
+  {
+  public:
+    vprefix_exptession(
+      const vfile & owner,
+      int line,
+      int column,
+      const std::string & op,
+      vexpression * right);
+
+    const vexpression * right() const
+    {
+      return this->right_.get();
+    }
+    
+    const std::string & op() const
+    {
+      return this->op_;
+    }
+    
+  private:
+    std::string op_;
+    std::unique_ptr<vexpression> right_;
+  };
 
   class vbinary_exptession : public vexpression
   {

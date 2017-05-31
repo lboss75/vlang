@@ -59,6 +59,7 @@ int vds::vcompiler::run(int argc, const char** argv)
       "=", "==",
       "+", "-",
       "?",
+      "!",
       nullptr
     };
 
