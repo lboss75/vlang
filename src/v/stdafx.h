@@ -9,7 +9,6 @@
 #include <memory>
 
 #include "vcompiler.h"
-#include "vruntime.h"
 #include "v2cpp.h"
 
 #endif//__STDAFX_H_

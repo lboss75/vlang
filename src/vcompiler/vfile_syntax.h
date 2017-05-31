@@ -3,6 +3,7 @@
 
 #include <string>
 #include <list>
+#include <map>
 #include "vlex.h"
 #include "vjson_object.h"
 #include "vjson_file_parser.h"

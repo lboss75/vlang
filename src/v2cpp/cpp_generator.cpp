@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "cpp_generator.h"
+#include "vfile_syntax.h"
 
 vds::cpp_generator::cpp_generator()
 : public_header_("public.h"),
@@ -12,56 +13,70 @@ vds::cpp_generator::~cpp_generator()
 {
 }
 
-void vds::cpp_generator::generate(vrt_package * package)
+void vds::cpp_generator::generate(vsyntax & root)
 {
-  this->public_header_ << "//Package " << package->name() << "\n";
-  this->private_header_ << "//Package " << package->name() << "\n";
-  this->implementation_ << "//Package " << package->name() << "\n";
+  this->public_header_ << "#include <memory>\n";
+  
+  for(auto & file : root.files()){
 
-  for (auto & class_info : package->classes()) {
-    auto names = parse_name(class_info->name());
+    this->public_header_ << "//Package " << file->file_path() << "\n";
+    this->private_header_ << "//Package " << file->file_path() << "\n";
+    this->implementation_ << "//Package " << file->file_path() << "\n";
 
-    for (auto p = names.begin(); p != names.end(); ) {
-      auto current = *p;
-      ++p;
+    for (auto & ns : file->namespaces()) {
+      this->public_header_ << "namespace " << ns->name() << "{\n";
+      this->private_header_ << "namespace " << ns->name() << "{\n";
+      this->implementation_ << "namespace " << ns->name() << "{\n";
+      for (auto & cls : ns->classes()) {
+        this->public_header_ << "  class " << cls->name() << "\n";
+        this->public_header_ << "  {\n";
+        this->public_header_ << "  public:\n";
+        this->public_header_ << "    " << cls->name() << "(){}\n";
+        
+        this->private_header_ << "  class _" << cls->name() << "\n";
+        this->private_header_ << "  : public std::enable_shared_from_this<_" << cls->name() << ">\n";
+        this->private_header_ << "  {\n";
+        this->private_header_ << "  public:\n";
 
-      if (p == names.end()) {
-        this->public_header_ << "class " << current << "\n";
-        this->public_header_ << "{\n";
-        this->public_header_ << "public:\n";
-        this->public_header_ << "  " << current << "(){}\n";
-
-
-        this->private_header_ << "class _" << current << "\n";
-        this->private_header_ << "{\n";
-
-        this->implementation_ << current << "::" << current << "()\n";
+        this->implementation_ << cls->name() << "::" << cls->name() << "()\n";
         this->implementation_ << "{\n";
         this->implementation_ << "}\n";
+        
+
+        for(auto& prop : cls->properties()){
+          this->public_header_ << "    " << prop->result_type()->name() << " get_" << prop->name() << "() const;\n";
+          this->public_header_ << "    void set_" << prop->name() << "(" << prop->result_type()->name() << " new_value);\n";
+
+          this->private_header_ << "    " << prop->result_type()->name()
+            << " get_" << prop->name() << "() const { return this->" << prop->name() << "_;}\n";
+          this->private_header_ << "    void set_" << prop->name() << "(" << prop->result_type()->name() << " new_value) {"
+            << " this->" << prop->name() << "_ = new_value; } \n";
+          
+          this->implementation_ << prop->result_type()->name() << " " << cls->name() << "::get_" << prop->name() << "() const\n";
+          this->implementation_ << "{\n";
+          this->implementation_ << "  return this->impl_->get_" << prop->name() << ";\n";
+          this->implementation_ << "}\n";
+        }
+
+
+
+        
+        this->public_header_ << "  private:\n";
+        this->private_header_ << "  private:\n";
+        
+        this->public_header_ << "    std::shared_ptr<_" << cls->name() << "> impl_;\n";
+        
+        for(auto& prop : cls->properties()){
+          this->private_header_ << "    " << prop->result_type()->name() << " " << prop->name() << "_;\n";
+        }
+
+        
+        this->public_header_ << "  };\n";
+        this->private_header_ << "  };\n";
       }
-      else {
-        this->public_header_ << "namespace " << current << "\n";
-        this->public_header_ << "{\n";
-
-
-        this->private_header_ << "namespace " << current << "\n";
-        this->private_header_ << "{\n";
-
-        this->implementation_ << current << "::";
-      }
-    }
-
-    for (auto & prop : class_info->properties()) {
-      this->generate_property(prop.get());
-    }
-
-    for (auto & m : class_info->methods()) {
-      this->generate_method(m.get());
-    }
-
-    for (auto p : names) {
-      this->public_header_ << "};\n";
-      this->private_header_ << "};\n";
+      this->public_header_ << "}\n";
+      this->private_header_ << "}\n";
+      this->implementation_ << "}\n";
     }
   }
 }
@@ -85,51 +100,3 @@ std::list<std::string> vds::cpp_generator::parse_name(const std::string & name)
   return result;
 }
 
-std::string vds::cpp_generator::type_name(const vrt_type * t)
-{
-  auto names = parse_name(t->name());
-  bool is_first = true;
-  std::string result;
-  for (auto n : names) {
-    if (is_first) {
-      is_first = false;
-    }
-    else {
-      result += "::";
-    }
-
-    result += n;
-  }
-
-  return result;
-
-}
-
-void vds::cpp_generator::generate_property(const vrt_property * prop)
-{
-  this->public_header_ << "private: " << type_name(prop->get_property_type()) << " " << prop->name() << "_;\n";
-}
-
-void vds::cpp_generator::generate_method(const vrt_callable * m)
-{
-  this->public_header_ << "public: ";
-
-  auto result_type = m->get_result_type();
-
-  if (nullptr == result_type) {
-    this->public_header_ << "void ";
-  }
-  else {
-    this->public_header_ << "std::shared_ptr<" << type_name(result_type) << "> ";
-  }
-
-  this->public_header_ << m->name();
-
-  this->public_header_ << "(const vds::service_provider & sp";
-
-  for (auto & p : m->parameters()) {
-    this->public_header_ << ", " << type_name(p->type()) << " " << p->name();
-  }
-
-  this->public_header_ << ");\n";
-}

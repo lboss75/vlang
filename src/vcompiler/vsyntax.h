@@ -2,6 +2,8 @@
 #define __VSYNTAX_H_
 
 #include <list>
+#include <string>
+#include <memory>
 
 namespace vds{
   class vlexer;

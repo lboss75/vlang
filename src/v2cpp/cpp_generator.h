@@ -1,6 +1,11 @@
 #ifndef __V2CPP_CPP_GENERATOR_H_
 #define __V2CPP_CPP_GENERATOR_H_
 
+#include <fstream>
+
+#include "vsyntax.h"
+
+
 namespace vds {
   class cpp_generator
   {
@@ -8,7 +13,7 @@ namespace vds {
     cpp_generator();
     ~cpp_generator();
 
-    void generate(vrt_package * package);
+    void generate(vsyntax & root);
 
   private:
     std::ofstream public_header_;
@@ -16,10 +21,7 @@ namespace vds {
     std::ofstream implementation_;
 
     static std::list<std::string> parse_name(const std::string & name);
-    static std::string type_name(const vrt_type * t);
 
-    void generate_property(const vrt_property * prop);
-    void generate_method(const vrt_callable * m);
   };
 }
 

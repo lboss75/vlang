@@ -40,7 +40,6 @@ int vds::vcompiler::run(int argc, const char** argv)
 {
   vsyntax t;
 
-  std::unique_ptr<vruntime_machine> machine(new vruntime_machine());
   for (int i = 1; i < argc; ++i) {
     auto filename = argv[i];
     std::cout << "compiling " << filename << "\n";
@@ -98,12 +97,8 @@ int vds::vcompiler::run(int argc, const char** argv)
     t.parse(l);
   }
 
-
-  auto package = vpackage_compiler::compile(machine.get(), t);
-
   cpp_generator generator;
-
-  generator.generate(package);
+  generator.generate(t);
   
 
   return 0;

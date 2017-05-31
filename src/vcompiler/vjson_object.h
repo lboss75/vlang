@@ -1,6 +1,8 @@
 #ifndef __VJSON_OBJECT_H_
 #define __VJSON_OBJECT_H_
 
+#include <vector>
+
 namespace vds {
   
   class vjson_value
