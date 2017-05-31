@@ -5,7 +5,6 @@
 #include "vrt_statement.h"
 #include "vrt_variable.h"
 #include "vrt_json.h"
-#include "vrt_object.h"
 #include "vrt_scope.h"
 #include "vrt_injection.h"
 #include "vrt_variable_declaration.h"

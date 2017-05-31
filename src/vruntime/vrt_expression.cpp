@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "vrt_expression.h"
 #include "vrt_variable.h"
-#include "vrt_object.h"
 #include "vrt_package.h"
 
 vds::vrt_expression::vrt_expression(const vrt_source_file * file, int line, int column)

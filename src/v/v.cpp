@@ -13,7 +13,7 @@ int main(int argc, const char **argv)
   }
   catch(std::exception * ex)
   {
-    printf("Error: %s", ex->what());
+    printf("Error: %s\n", ex->what());
     delete ex;
     return 1;
   }

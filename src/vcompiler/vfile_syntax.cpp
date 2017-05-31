@@ -898,7 +898,27 @@ std::unique_ptr<vds::vexpression> vds::vfile_syntax::parse_expression14()
 
 std::unique_ptr<vds::vexpression> vds::vfile_syntax::parse_expression15()
 {
-  return this->parse_expression14();
+  auto result = this->parse_expression14();
+  for (;;) {
+    vlex operator_start;
+    if (this->optional("=", LT_OPERATOR, &operator_start)) {
+      auto right = this->parse_expression14();
+      result.reset(new vbinary_exptession(
+        *this->file_.get(),
+        operator_start.token.line,
+        operator_start.token.column,        
+        "=",
+        result.release(),
+        right.release()
+      ));
+
+      continue;
+    }
+
+    break;
+  }
+
+  return result;
 }
 
 std::unique_ptr<vds::vexpression> vds::vfile_syntax::parse_expression16()

@@ -9,7 +9,7 @@ line_(1), column_(1), filename_(filename)
   this->handle_ = open(filename.c_str(), O_RDONLY);
   if (0 > this->handle_) {
     auto error = errno;
-    throw std::system_error(error, std::general_ca(), "Unable to open file " + filename);
+    throw std::system_error(error, std::generic_category(), "Unable to open file " + filename);
   }
 #else
     this->handle_ = _open(filename.c_str(), _O_RDONLY);

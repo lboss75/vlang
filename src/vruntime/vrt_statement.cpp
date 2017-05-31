@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "vrt_statement.h"
 #include "vrt_variable.h"
-#include "vrt_object.h"
 
 vds::vrt_statement::vrt_statement(const vds::vrt_source_file* file, int line, int column)
   : file_(file), line_(line), column_(column)

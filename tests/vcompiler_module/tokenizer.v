@@ -18,7 +18,7 @@ namespace v {
 		public property	current : text_symbol?;
 	}
 
-	abstract class token
+	class token
 	{
 	}
         
