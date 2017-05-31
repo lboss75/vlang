@@ -403,6 +403,22 @@ namespace vds {
     friend class vfile_syntax;
   };
   
+  class vwhile_statement : public vstatement
+  {
+  public:
+    vwhile_statement(
+      const vfile & owner,
+      int line,
+      int column      
+    );
+    
+  private:
+    std::unique_ptr<vexpression> condition_;
+    std::unique_ptr<vblock_statement> body_;
+    
+    friend class vfile_syntax;
+  };
+  
   class vreturn_statement : public vstatement
   {
   public:
@@ -760,6 +776,7 @@ namespace vds {
     std::unique_ptr<vforeach_statement> parse_foreach(const vlex & operator_start);
     std::unique_ptr<var_statement> parse_var(const vlex & operator_start);
     std::unique_ptr<vif_statement> parse_if(const vlex & operator_start);
+    std::unique_ptr<vwhile_statement> parse_while(const vlex & operator_start);
     std::unique_ptr<vreturn_statement> parse_return(const vlex & operator_start);
     
     std::unique_ptr<vexpression> parse_expression();

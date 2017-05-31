@@ -39,6 +39,13 @@ vds::vif_statement::vif_statement(const vds::vfile& owner, int line, int column)
 {
 }
 
+vds::vwhile_statement::vwhile_statement(const vds::vfile& owner, int line, int column)
+: vstatement(owner, line, column)
+{
+
+}
+
+
 vds::vexpression_statement::vexpression_statement(
   vexpression * expression)
 : vstatement(expression->owner(), expression->line(), expression->column()),
@@ -520,6 +527,11 @@ void vds::vfile_syntax::parse_block_statement(
       continue;
     }
     
+    if (this->optional("while", LT_KEYWORD, &start_operator)) {
+      block->statements_.push_back(this->parse_while(start_operator));
+      continue;
+    }
+    
     if(this->optional("return", LT_KEYWORD, &start_operator)) {
       block->statements_.push_back(this->parse_return(start_operator));
       continue;
@@ -901,12 +913,52 @@ std::unique_ptr<vds::vexpression> vds::vfile_syntax::parse_expression12()
 
 std::unique_ptr<vds::vexpression> vds::vfile_syntax::parse_expression13()
 {
-  return this->parse_expression12();
+  auto result = this->parse_expression12();
+  for (;;) {
+    vlex operator_start;
+    if (this->optional("&&", LT_OPERATOR, &operator_start)) {
+      auto right = this->parse_expression12();
+      result.reset(new vbinary_exptession(
+        *this->file_.get(),
+        operator_start.token.line,
+        operator_start.token.column,        
+        "&&",
+        result.release(),
+        right.release()
+      ));
+
+      continue;
+    }
+
+    break;
+  }
+
+  return result;
 }
 
 std::unique_ptr<vds::vexpression> vds::vfile_syntax::parse_expression14()
 {
-  return this->parse_expression13();
+  auto result = this->parse_expression13();
+  for (;;) {
+    vlex operator_start;
+    if (this->optional("||", LT_OPERATOR, &operator_start)) {
+      auto right = this->parse_expression13();
+      result.reset(new vbinary_exptession(
+        *this->file_.get(),
+        operator_start.token.line,
+        operator_start.token.column,        
+        "||",
+        result.release(),
+        right.release()
+      ));
+
+      continue;
+    }
+
+    break;
+  }
+
+  return result;
 }
 
 
@@ -928,7 +980,35 @@ std::unique_ptr<vds::vexpression> vds::vfile_syntax::parse_expression15()
 
       continue;
     }
+    
+    if (this->optional("+=", LT_OPERATOR, &operator_start)) {
+      auto right = this->parse_expression14();
+      result.reset(new vbinary_exptession(
+        *this->file_.get(),
+        operator_start.token.line,
+        operator_start.token.column,        
+        "+=",
+        result.release(),
+        right.release()
+      ));
 
+      continue;
+    }
+
+    if (this->optional("-=", LT_OPERATOR, &operator_start)) {
+      auto right = this->parse_expression14();
+      result.reset(new vbinary_exptession(
+        *this->file_.get(),
+        operator_start.token.line,
+        operator_start.token.column,        
+        "-=",
+        result.release(),
+        right.release()
+      ));
+
+      continue;
+    }
+    
     break;
   }
 
@@ -1029,6 +1109,21 @@ std::unique_ptr<vds::vif_statement> vds::vfile_syntax::parse_if(const vlex & ope
   if (this->optional("else", LT_KEYWORD)) {
     result->else_body_ = this->parse_block_statement();
   }
+  
+  return result;
+}
+
+std::unique_ptr<vds::vwhile_statement> vds::vfile_syntax::parse_while(const vlex & operator_start)
+{
+  std::unique_ptr<vds::vwhile_statement> result(new vds::vwhile_statement(
+      *this->file_.get(),
+      operator_start.token.line,
+      operator_start.token.column
+  ));
+  this->require("(");
+  result->condition_ = this->parse_expression();
+  this->require(")");
+  result->body_ = this->parse_block_statement();
   
   return result;
 }

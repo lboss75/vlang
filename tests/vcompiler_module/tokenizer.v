@@ -51,25 +51,23 @@ namespace v {
 			}
 
 			for(;;) {
-			   if('_' == ch.symbol || ch.symbol.isalpha){
-				var first_char = ch;
+        if("_" == ch.symbol || ch.symbol.isalpha){
+          var first_char = ch;
      
-     				string value;
-				while('_' == ch.symbol || ch.symbol.isalnum){
+          var value : string;
+          while("_" == ch.symbol || ch.symbol.isalnum){
 				       value += ch.symbol;
 				       ch = this.stream_.read();
-				}
+          }
 
-				return new word_token(
-					line: first_char.line,
-					column: first_char.column,
-					value: value);
-			   }
-                        }
-			
-
-		}
-	
-		private property stream_ : text_stream;
+          return new word_token(
+            line: first_char.line,
+            column: first_char.column,
+            value: value);
+        }
+      }
+    }
+    
+    property stream_ : text_stream;
 	}
 }

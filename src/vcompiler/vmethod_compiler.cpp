@@ -225,7 +225,7 @@ const vds::vrt_type * vds::vmethod_compiler::compile_expression(
   if (nullptr != name_exp) {
     return this->compile_name(name_exp);
   }
-
+  
   throw new compile_error(
     ex->owner().file_path(),
     ex->line(),
