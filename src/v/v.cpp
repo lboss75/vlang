@@ -19,22 +19,22 @@ int main(int argc, const char **argv)
   }
 }
 
-static bool ends_with(const std::string & str, const char * suffix)
-{
-  
-  if(str.empty() || suffix == nullptr){
-    return false;
-  }
-
-  size_t str_len = str.size();
-  size_t suffix_len = strlen(suffix);
-
-  if(suffix_len > str_len) {
-    return false;
-  }
-
-  return 0 == strncmp(str.c_str() + str_len - suffix_len, suffix, suffix_len);
-}
+//static bool ends_with(const std::string & str, const char * suffix)
+//{
+//  
+//  if(str.empty() || suffix == nullptr){
+//    return false;
+//  }
+//
+//  size_t str_len = str.size();
+//  size_t suffix_len = strlen(suffix);
+//
+//  if(suffix_len > str_len) {
+//    return false;
+//  }
+//
+//  return 0 == strncmp(str.c_str() + str_len - suffix_len, suffix, suffix_len);
+//}
 
 int vds::vcompiler::run(int argc, const char** argv)
 {

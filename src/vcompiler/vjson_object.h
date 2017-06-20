@@ -2,6 +2,7 @@
 #define __VJSON_OBJECT_H_
 
 #include <vector>
+#include <functional>
 
 namespace vds {
   

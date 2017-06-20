@@ -4,16 +4,27 @@ package vcompiler
 }
 
 namespace v {
+
 	class text_symbol
 	{
-	  public property line : int;
-	  public property column : int;
-	  public property symbol : char;
+	  public property line : Integer;
+	  public property column : Integer;
+	  public property symbol : Char;
+	}
+
+	class filename
+	{
+		public filename(name: String)
+		{
+			this.value = name;
+		}
+
+		property value : String;
 	}
 
 	class text_stream
 	{
-		public external text_stream(filename: string);
+		public external text_stream(filename: String);
 		public external read() : text_symbol?;
 		public property	current : text_symbol?;
 	}
@@ -25,15 +36,18 @@ namespace v {
 	class word_token : token
 	{
 		word_token(
-			line : int,
-	  		column : int,
-			value : string)
+			line : Integer,
+	  		column : Integer,
+			value : String)
 		{
+			this.line = line;
+			this.column = column;
+			this.value = value;
 		}
 
-	  public property line : int;
-	  public property column : int;
-	  public property value : string;
+	  public property line : Integer;
+	  public property column : Integer;
+	  public property value : String;
         }
 
 
@@ -54,7 +68,7 @@ namespace v {
         if("_" == ch.symbol || ch.symbol.isalpha){
           var first_char = ch;
      
-          var value : string;
+          var value : String;
           while("_" == ch.symbol || ch.symbol.isalnum){
 				       value += ch.symbol;
 				       ch = this.stream_.read();
@@ -69,5 +83,20 @@ namespace v {
     }
     
     property stream_ : text_stream;
+	}
+
+	class vcompiler
+	{
+		public static compile(file_to_compile: filename)
+		{
+			var text_stream = new text_stream(filename: file_to_compile);
+			var t = new tokenizer(stream: text_stream);
+			var l = new vlexer(tokenizer: t);
+			var t = new vsyntax(lexer: l);
+
+			var tree = t.parse();
+
+			cpp_generator.generate(tree: tree);
+		}
 	}
 }

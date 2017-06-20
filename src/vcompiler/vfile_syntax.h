@@ -361,6 +361,11 @@ namespace vds {
       int column      
     );
     
+    const vstatement * init() const { return this->init_.get(); }
+    const vexpression * condition() const { return this->condition_.get(); }
+    const vstatement * step() const { return this->step_.get(); }
+    const vblock_statement * body() const { return this->body_.get(); }
+
   private:
     std::unique_ptr<vstatement> init_;
     std::unique_ptr<vexpression> condition_;
@@ -395,7 +400,11 @@ namespace vds {
       int line,
       int column      
     );
-    
+
+    const vexpression * condition() const { return this->condition_.get(); }
+    const vblock_statement * body() const { return this->body_.get(); }
+    const vblock_statement * else_body() const { return this->else_body_.get(); }
+
   private:
     std::unique_ptr<vexpression> condition_;
     std::unique_ptr<vblock_statement> body_;
@@ -412,7 +421,10 @@ namespace vds {
       int line,
       int column      
     );
-    
+
+    const vexpression * condition() const { return this->condition_.get(); }
+    const vblock_statement * body() const { return this->body_.get(); }
+
   private:
     std::unique_ptr<vexpression> condition_;
     std::unique_ptr<vblock_statement> body_;
