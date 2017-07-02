@@ -2,7 +2,11 @@
 #include "cpp_generator.h"
 #include "vfile_syntax.h"
 
+#ifdef _WIN32
 #define test_out "D:\\projects\\vlang.test\\vlang.test\\"
+#else
+#define test_out "~/projects/vlang/tests/vcompiled/"
+#endif
 
 vds::cpp_generator::cpp_generator()
 : public_header_(test_out "public.h"),
@@ -230,9 +234,7 @@ void vds::cpp_generator::generate(const vstatement * st)
   if (nullptr != forst) {
     this->implementation_ << "for(";
     this->generate(forst->init());
-    this->implementation_ << ";";
     this->generate(forst->condition());
-    this->implementation_ << ";";
     this->generate(forst->step());
     this->implementation_ << "){\n";
     this->generate(forst->body());
@@ -322,7 +324,7 @@ void vds::cpp_generator::generate(const vexpression * exp)
 
   auto strexp = dynamic_cast<const vstring_expression *>(exp);
   if (nullptr != strexp) {
-    this->implementation_ << "\"" << strexp->value() << "\"";
+    this->implementation_ << "String::__create(\"" << strexp->value() << "\")";
     return;
   }
 
