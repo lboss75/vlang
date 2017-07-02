@@ -339,12 +339,34 @@ void vds::cpp_generator::generate(const vexpression * exp)
       }
 
       this->generate(arg->value());
-      this->implementation_ << ")";
     }
+    this->implementation_ << ")";
     return;
   }
+  
+  auto invoke_exp = dynamic_cast<const vinvoke_expression *>(exp);
+  if(nullptr != invoke_exp){
+    this->generate(invoke_exp->object());
+    this->implementation_ << "->" << invoke_exp->name() << "(";
+    
+    bool is_first = true;
+    for (auto & arg : invoke_exp->arguments()) {
+      if (is_first) {
+        is_first = false;
+      }
+      else {
+        this->implementation_ << ", ";
+      }
 
-  throw std::runtime_error("Unexpected expression");
+      this->generate(arg->value());
+    }
+    this->implementation_ << ")";
+    return;
+  }
+  
+  std::string type = typeid(exp).name();
+
+  throw std::runtime_error("Unexpected expression " + type);
 }
 
 void vds::cpp_generator::generate_left(const vexpression * exp, const std::function<void(void)>& right_callback)

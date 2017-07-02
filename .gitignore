@@ -32,3 +32,11 @@
 build/
 *.filters
 .kdev4/
+
+D:\\projects\\vlang.test\\vlang.test\\implementation.cpp
+D:\\projects\\vlang.test\\vlang.test\\private.h
+D:\\projects\\vlang.test\\vlang.test\\public.h
+implementation.cpp
+private.h
+public.h
+vlang.kdev4
