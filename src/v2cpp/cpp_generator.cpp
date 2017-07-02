@@ -5,7 +5,7 @@
 #ifdef _WIN32
 #define test_out "D:\\projects\\vlang.test\\vlang.test\\"
 #else
-#define test_out "~/projects/vlang/tests/vcompiled/"
+#define test_out "/home/vadim/projects/vlang/tests/vcompiled/"
 #endif
 
 vds::cpp_generator::cpp_generator()
