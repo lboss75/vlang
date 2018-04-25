@@ -14,6 +14,7 @@ namespace vds {
   class vstatement;
   class vblock_statement;
   class vexpression;
+  class vnamespace;
 
   class cpp_generator
   {
@@ -40,6 +41,8 @@ namespace vds {
     void generate(const vexpression * exp);
     void generate_left(const vexpression * exp, const std::function<void(void)> & right_callback);
 
+    std::string struct_name(const std::unique_ptr<vnamespace> &ns, const std::unique_ptr<vclass> &cls);
+    std::string construct_name(const std::unique_ptr<vnamespace> &ns, const std::unique_ptr<vclass> &cls);
   };
 }
 

@@ -38,62 +38,81 @@ void vds::cpp_generator::generate(vsyntax & root)
     this->public_header_ << "//Package " << file->file_path() << "\n";
     this->private_header_ << "//Package " << file->file_path() << "\n";
     this->implementation_ << "//Package " << file->file_path() << "\n";
+    for (auto & ns : file->namespaces()) {
+      for (auto &cls : ns->classes()) {
+        this->public_header_ << "  struct " << this->struct_name(ns, cls) << ";//Forward\n";
+        this->public_header_ << "  "
+                             << this->struct_name(ns, cls)
+                             << " * "
+                             << this->construct_name(ns, cls)
+                             << "();\n";
+      }
+    }
 
     for (auto & ns : file->namespaces()) {
-      this->public_header_ << "namespace " << ns->name() << "{\n";
-      this->private_header_ << "namespace " << ns->name() << "{\n";
-      this->implementation_ << "namespace " << ns->name() << "{\n";
+      for (auto &cls : ns->classes()) {
+        for(auto& prop : cls->properties()) {
+          this->public_header_ << "    "
+                               << prop->result_type()->name()
+                               << " * "
+                               << this->struct_name(ns, cls)
+                               << "_get_"
+                               << prop->name()
+                               << "("
+                               << this->struct_name(ns, cls)
+                               << " * pthis);\n";
+
+          this->public_header_ << "    void "
+                               << this->struct_name(ns, cls)
+                               << "_set_"
+                               << prop->name()
+                               << "(const "
+                               << this->struct_name(ns, cls)
+                               << " * pthis, "
+                               << prop->result_type()->name()
+                               << " new_value);\n";
+        }
+      }
+    }
+
+    for (auto & ns : file->namespaces()) {
       for (auto & cls : ns->classes()) {
-        this->public_header_ << "  class _" << cls->name() << ";//Forward\n";
-
-        this->public_header_ << "  class " << cls->name() << "\n";
-        this->public_header_ << "  {\n";
-        this->public_header_ << "  public:\n";
-        this->public_header_ << "    " << cls->name() << "(){}\n";
-        
-        this->private_header_ << "  class _" << cls->name() << "\n";
-        this->private_header_ << "  : public std::enable_shared_from_this<_" << cls->name() << ">\n";
-        this->private_header_ << "  {\n";
-        this->private_header_ << "  public:\n";
-
-       
+        this->public_header_ << "  struct " << this->struct_name(ns, cls) << "{\n";
+        for(auto& prop : cls->properties()){
+          this->public_header_ << "    " << prop->result_type()->name() << " " << prop->name() << "_;\n";
+        }
+        this->public_header_ << "  };\n";
 
         for(auto& prop : cls->properties()){
-          this->public_header_ << "    " << prop->result_type()->name() << " get_" << prop->name() << "() const;\n";
-          this->public_header_ << "    void set_" << prop->name() << "(" << prop->result_type()->name() << " new_value);\n";
+          this->implementation_
+              << "    "
+              << prop->result_type()->name()
+              << " * "
+              << this->struct_name(ns, cls)
+              << "_get_"
+              << prop->name()
+              << "(const "
+              << this->struct_name(ns, cls)
+              << " * pthis){\n"
+              << "          return pthis->" << prop->name() << "_;}\n";
 
-          this->private_header_ << "    " << prop->result_type()->name()
-            << " get_" << prop->name() << "() const { return this->" << prop->name() << "_;}\n";
-          this->private_header_ << "    void set_" << prop->name() << "(" << prop->result_type()->name() << " new_value) {"
-            << " this->" << prop->name() << "_ = new_value; } \n";
-          
-          this->implementation_ << prop->result_type()->name() << " " << cls->name() << "::get_" << prop->name() << "() const\n";
-          this->implementation_ << "{\n";
-          this->implementation_ << "  return this->impl_->get_" << prop->name() << "();\n";
-          this->implementation_ << "}\n";
+          this->implementation_
+              << "    void "
+              << this->struct_name(ns, cls)
+              << "_set_"
+              << prop->name()
+              << "(const "
+              << this->struct_name(ns, cls)
+              << " * pthis, "
+              << prop->result_type()->name()
+              << " new_value) {\n"
+              << " pthis->" << prop->name() << "_ = new_value; } \n";
         }
 
         for (auto& method : cls->methods()) {
           this->generate(cls.get(), method.get());
         }
-
-        
-        this->public_header_ << "  private:\n";
-        this->private_header_ << "  private:\n";
-        
-        this->public_header_ << "    std::shared_ptr<_" << cls->name() << "> impl_;\n";
-        
-        for(auto& prop : cls->properties()){
-          this->private_header_ << "    " << prop->result_type()->name() << " " << prop->name() << "_;\n";
-        }
-
-        
-        this->public_header_ << "  };\n";
-        this->private_header_ << "  };\n";
       }
-      this->public_header_ << "}\n";
-      this->private_header_ << "}\n";
-      this->implementation_ << "}\n";
     }
   }
 
@@ -389,4 +408,13 @@ void vds::cpp_generator::generate_left(const vexpression * exp, const std::funct
   }
 
   throw std::runtime_error("Unexpected expression");
+}
+
+std::string vds::cpp_generator::struct_name(const std::unique_ptr<vds::vnamespace> &ns, const std::unique_ptr<vds::vclass> &cls) {
+  return ns->name() + "_" + cls->name();
+}
+
+std::string vds::cpp_generator::construct_name(const std::unique_ptr<vds::vnamespace> &ns,
+                                               const std::unique_ptr<vds::vclass> &cls) {
+  return ns->name() + "_" + cls->name() + "_construct";
 }
