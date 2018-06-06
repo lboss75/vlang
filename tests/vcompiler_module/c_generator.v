@@ -11,9 +11,20 @@ namespace v {
 	  public property name : string;
 	}
 
+	class statement_info
+	{
+
+	}
+
+	class foreach_statement : statement_info
+	{
+
+	}
+
 	class method_info
 	{
 		public property arguments : argument_info[];
+		public property statements : statement_info[];
 	}
 
 	class property_info
@@ -99,7 +110,7 @@ namespace v {
 		}
 	}
 
-	class c_return
+	class c_return : c_statement
 	{
 		public c_return(expression: c_expression){
 		}
@@ -117,7 +128,7 @@ namespace v {
 		}
 	}
 
-	class c_assign : c_expression
+	class c_assign : c_statement
 	{
 		public c_assign(left: c_expression, right : c_expression){
 		}
@@ -174,9 +185,25 @@ namespace v {
 						foreach(var arg in m.arguments){
 							method.add_argument(type: arg.type, name: arg.name);
 						}
+
+						foreach(var st in m.statements){
+							method.add(statement:
+							 this.compile_statement(
+							    statement: st));
+						}
 					}
 				}
 			}
+		}
+
+		public compile_statement(statement: statement_info) : c_statement {
+		    switch(typeof(statement)){
+		    case foreach_statement:
+
+		        break;
+
+		    }
+
 		}
 	}
 }
