@@ -271,6 +271,14 @@ namespace vds {
       return this->name_;
     }
 
+    int array_rank() const {
+      return this->array_rank_;
+    }
+
+    bool is_optional() const {
+      return this->is_optional_;
+    }
+
   private:
     int array_rank_;
     bool is_optional_;
@@ -384,6 +392,18 @@ namespace vds {
       int column      
     );
     
+    const std::string & variable() const {
+      return this->variable_;
+    }
+
+    vexpression * collection() const {
+      return this->collection_.get();
+    }
+
+    vblock_statement * body() const {
+      return this->body_.get();
+    }
+
   private:
     std::string variable_;
     std::unique_ptr<vexpression> collection_;

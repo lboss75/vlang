@@ -1,18 +1,20 @@
 #ifndef CORE_TYPES_H
 #define CORE_TYPES_H
 
-class Integer
+class v_int
 {
 };
 
-class String
-{
-};
-
-class Char
+class v_string
 {
 public:
-  bool __not() const;
+  v_string * __add(v_string * value);
+
+  static v_string * create(const char * value);
+};
+
+class v_char
+{
 };
 
 

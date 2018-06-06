@@ -3,7 +3,7 @@
 #include "vfile_syntax.h"
 
 #ifdef _WIN32
-#define test_out "D:\\projects\\vlang.test\\vlang.test\\"
+#define test_out "C:\\Users\\v.malyshev\\source\\repos\\vlang\\tests\\vcompiled\\"
 #else
 #define test_out "/home/vadim/projects/vlang/tests/vcompiled/"
 #endif
@@ -38,27 +38,26 @@ void vds::cpp_generator::generate(vsyntax & root)
     this->public_header_ << "//Package " << file->file_path() << "\n";
     this->private_header_ << "//Package " << file->file_path() << "\n";
     this->implementation_ << "//Package " << file->file_path() << "\n";
+
+    this->public_header_ << "//Forwards\n";
+
     for (auto & ns : file->namespaces()) {
       for (auto &cls : ns->classes()) {
-        this->public_header_ << "  struct " << this->struct_name(ns, cls) << ";//Forward\n";
-        this->public_header_ << "  "
-                             << this->struct_name(ns, cls)
-                             << " * "
-                             << this->construct_name(ns, cls)
-                             << "();\n";
+        this->public_header_ << "  struct " << this->struct_name(ns, cls) << ";\n";
+        this->public_header_ << "  struct " << this->struct_name(ns, cls) << "_array;\n";
       }
     }
 
+    this->public_header_ << "//Members\n";
     for (auto & ns : file->namespaces()) {
       for (auto &cls : ns->classes()) {
         for(auto& prop : cls->properties()) {
           this->public_header_ << "    "
-                               << prop->result_type()->name()
-                               << " * "
+                               << this->struct_name(ns, prop->result_type())
                                << this->struct_name(ns, cls)
                                << "_get_"
                                << prop->name()
-                               << "("
+                               << "(const "
                                << this->struct_name(ns, cls)
                                << " * pthis);\n";
 
@@ -66,10 +65,10 @@ void vds::cpp_generator::generate(vsyntax & root)
                                << this->struct_name(ns, cls)
                                << "_set_"
                                << prop->name()
-                               << "(const "
+                               << "("
                                << this->struct_name(ns, cls)
                                << " * pthis, "
-                               << prop->result_type()->name()
+                               << this->struct_name(ns, prop->result_type())
                                << " new_value);\n";
         }
       }
@@ -77,17 +76,38 @@ void vds::cpp_generator::generate(vsyntax & root)
 
     for (auto & ns : file->namespaces()) {
       for (auto & cls : ns->classes()) {
-        this->public_header_ << "  struct " << this->struct_name(ns, cls) << "{\n";
+        this->private_header_ << "  struct " << this->struct_name(ns, cls) << "{\n";
         for(auto& prop : cls->properties()){
-          this->public_header_ << "    " << prop->result_type()->name() << " " << prop->name() << "_;\n";
+          this->private_header_ << "    " << this->struct_name(ns, prop->result_type()) << prop->name() << "_;\n";
+
+          this->private_header_ << "    "
+            << this->struct_name(ns, prop->result_type())
+            << "get_"
+            << prop->name()
+            << "(){\n"
+            << " return "
+            << this->struct_name(ns, cls)
+            << "_get_"
+            << prop->name()
+            << "(this); }\n";
+
+          this->private_header_ << "    void "
+            << "set_"
+            << prop->name()
+            << "("
+            << this->struct_name(ns, prop->result_type())
+            << " new_value){\n"
+            << this->struct_name(ns, cls)
+            << "_set_"
+            << prop->name()
+            << "(this, new_value);\n"
+            << "}\n";
         }
-        this->public_header_ << "  };\n";
 
         for(auto& prop : cls->properties()){
           this->implementation_
               << "    "
-              << prop->result_type()->name()
-              << " * "
+              << this->struct_name(ns, prop->result_type())
               << this->struct_name(ns, cls)
               << "_get_"
               << prop->name()
@@ -101,17 +121,43 @@ void vds::cpp_generator::generate(vsyntax & root)
               << this->struct_name(ns, cls)
               << "_set_"
               << prop->name()
-              << "(const "
+              << "("
               << this->struct_name(ns, cls)
               << " * pthis, "
-              << prop->result_type()->name()
+              << this->struct_name(ns, prop->result_type())
               << " new_value) {\n"
               << " pthis->" << prop->name() << "_ = new_value; } \n";
         }
 
         for (auto& method : cls->methods()) {
-          this->generate(cls.get(), method.get());
+          this->generate(ns, cls, method.get());
         }
+        this->private_header_ << "  };\n";
+
+        this->private_header_ << "  struct " << this->struct_name(ns, cls) << "_iterator;\n";
+        this->private_header_ << "  struct " << this->struct_name(ns, cls) << "_array {\n";
+        this->private_header_ << "    " << this->struct_name(ns, cls) << " ** data; \n";
+        this->private_header_ << "    int count; \n";
+        this->private_header_ << "     " << this->struct_name(ns, cls) << "_iterator * get_iterator(); \n";
+        this->private_header_ << "  };\n";
+
+        this->implementation_ << "     " << this->struct_name(ns, cls) << "_iterator * " << this->struct_name(ns, cls) << "_array::get_iterator() { \n";
+        this->implementation_ << "     return new " << this->struct_name(ns, cls) << "_iterator(this);\n";
+        this->implementation_ << "     };\n";
+
+        this->private_header_ << "  struct " << this->struct_name(ns, cls) << "_iterator {\n";
+        this->private_header_ << "    " << this->struct_name(ns, cls) << "_array * owner_; \n";
+        this->private_header_ << "    int index_; \n";
+        this->private_header_ << "      " << this->struct_name(ns, cls) << "_iterator(" << this->struct_name(ns, cls) << "_array * owner) {\n";
+        this->private_header_ << "    this->owner_ = owner; \n";
+        this->private_header_ << "    this->index_ = 0; \n";
+        this->private_header_ << "    } \n";
+        this->private_header_ << "    bool next() {\n";
+        this->private_header_ << "      this->index_++;\n";
+        this->private_header_ << "      return this->index_ < this->owner_->count;\n";
+        this->private_header_ << "    }\n";
+        this->private_header_ << "    " << this->struct_name(ns, cls) << " * current() { return this->owner_->data[this->index_]; }\n";
+        this->private_header_ << "  };\n";
       }
     }
   }
@@ -139,55 +185,128 @@ std::list<std::string> vds::cpp_generator::parse_name(const std::string & name)
   return result;
 }
 
-void vds::cpp_generator::generate(const vclass * cls, const vmethod * m)
+std::string vds::cpp_generator::method_name(const std::unique_ptr<vnamespace>& ns, const std::unique_ptr<vclass>& cls,
+  const vmethod* method) {
+  return ns->name() + "_" + cls->name() + "_" + method->name();
+}
+
+void vds::cpp_generator::generate(const std::unique_ptr<vds::vnamespace> &ns, const std::unique_ptr<vclass> &cls, const vmethod * m)
 {
   if (m->is_static()) {
-    this->public_header_ << "static ";
     this->private_header_ << "static ";
   }
 
   bool is_counstruct = (cls->name() == m->name());
 
   if (is_counstruct) {
-    this->public_header_ << "void __construct(";
-    this->private_header_ << "void __construct(";
+    this->public_header_ << "  "
+      << this->struct_name(ns, cls)
+      << " * "
+      << this->construct_name(ns, cls)
+      << "(";
+
     if (!m->is_external()) {
-      this->implementation_ << "void " << cls->name() << "::__construct(";
+      this->implementation_ 
+        << "  "
+        << this->struct_name(ns, cls)
+        << " * "
+        << this->construct_name(ns, cls)
+        << "(";
     }
   }
   else {
-    this->public_header_ << this->print_type(m->result_type()) << " " << m->name() << "(";
-    this->private_header_ << this->print_type(m->result_type()) << " " << m->name() << "(";
+    this->private_header_ << this->struct_name(ns, m->result_type()) << m->name() << "(";
+    this->public_header_ << this->struct_name(ns, m->result_type()) << this->method_name(ns, cls, m) << "(";
     if (!m->is_external()) {
-      this->implementation_ << this->print_type(m->result_type()) << " " << cls->name() << "::" << m->name() << "(";
+      this->implementation_ << this->struct_name(ns, m->result_type()) << this->method_name(ns, cls, m) << "(";
+    }
+    if(!m->is_static()) {
+      this->public_header_ << this->struct_name(ns, cls) << " * pthis";
+      if (!m->is_external()) {
+        this->implementation_ << this->struct_name(ns, cls) << " * pthis";
+      }
     }
   }
   bool is_first = true;
   for (auto & arg : m->parameters()) {
+    if(!is_counstruct && (!is_first || !m->is_static())) {
+      this->public_header_ << ", ";
+    }
+    if ((!is_first || (is_first && !m->is_static() && !is_counstruct)) && !m->is_external()) {
+      this->implementation_ << ", ";
+    }
+
     if (is_first) {
       is_first = false;
     }
+    else if(!is_counstruct){
+      this->private_header_ << ", ";
+    }
     else {
       this->public_header_ << ", ";
-      this->private_header_ << ", ";
-      if (!m->is_external()) {
-        this->implementation_ << ", ";
-      }
     }
 
-    this->public_header_ << this->print_type(arg->type()) << " " << arg->name();
-    this->private_header_ << this->print_type(arg->type()) << " " << arg->name();
+    if (!is_counstruct) {
+      this->private_header_ << this->struct_name(ns, arg->type()) << arg->name();
+    }
+
+    this->public_header_ << this->struct_name(ns, arg->type()) << arg->name();
     if (!m->is_external()) {
-      this->implementation_ << this->print_type(arg->type()) << " " << arg->name();
+      this->implementation_ << this->struct_name(ns, arg->type()) << arg->name();
     }
   }
 
   this->public_header_ << ");\n";
-  this->private_header_ << ");\n";
+  if (!is_counstruct) {
+    this->private_header_ << "){\n";
+  }
+  if(m->result_type() && !is_counstruct) {
+    this->private_header_ << "return ";
+  }
+
+  if (!is_counstruct) {
+    this->private_header_ << this->method_name(ns, cls, m) << "(";
+
+    if (!m->is_static()) {
+      this->private_header_ << "this";
+      is_first = false;
+    }
+    else {
+      is_first = true;
+    }
+
+    for (auto & arg : m->parameters()) {
+      if (is_first) {
+        is_first = false;
+      }
+      else {
+        this->private_header_ << ", ";
+      }
+
+      this->private_header_ << arg->name();
+    }
+    this->private_header_ << ");\n}\n";
+  }
+
   if (!m->is_external()) {
     this->implementation_ << ")\n{\n";
 
+    if(is_counstruct) {
+      this->implementation_
+        << this->struct_name(ns, cls)
+        << " * pthis = ("
+        << this->struct_name(ns, cls)
+        << " *)malloc(sizeof("
+        << this->struct_name(ns, cls)
+        << "));\n";
+    }
+
     this->generate(m->body());
+
+    if (is_counstruct) {
+      this->implementation_
+        << "return pthis;";
+    }
 
     this->implementation_ << "}\n";
   }
@@ -271,6 +390,19 @@ void vds::cpp_generator::generate(const vstatement * st)
     return;
   }
 
+  auto foreachst = dynamic_cast<const vforeach_statement *>(st);
+  if (nullptr != foreachst) {
+    this->implementation_ << "auto iterator = (";
+    this->generate(foreachst->collection());
+    this->implementation_ << ")->get_iterator();\n";
+
+    this->implementation_ << "while(iterator->next()){\n";
+    this->implementation_ << "auto " << foreachst->variable() << " = iterator->current();\n";
+    this->generate(foreachst->body());
+    this->implementation_ << "}\n";
+    return;
+  }
+
   throw std::runtime_error("Unexpected statement");
 }
 
@@ -290,14 +422,14 @@ void vds::cpp_generator::generate(const vexpression * exp)
     }
     if ("||" == bexp->op()) {
       this->generate(bexp->left());
-      this->implementation_ << ".__logical_or(";
+      this->implementation_ << "->__logical_or(";
       this->generate(bexp->right());
       this->implementation_ << ")";
       return;
     }
     if ("==" == bexp->op()) {
       this->generate(bexp->left());
-      this->implementation_ << ".__is_equal(";
+      this->implementation_ << "->__is_equal(";
       this->generate(bexp->right());
       this->implementation_ << ")";
       return;
@@ -305,10 +437,17 @@ void vds::cpp_generator::generate(const vexpression * exp)
     if ("+=" == bexp->op()) {
       this->generate_left(bexp->left(), [this, bexp]() {
         this->generate(bexp->left());
-        this->implementation_ << ".__add(";
+        this->implementation_ << "->__add_assign(";
         this->generate(bexp->right());
         this->implementation_ << ")";
       });
+      return;
+    }
+    if ("+" == bexp->op()) {
+      this->generate(bexp->left());
+      this->implementation_ << "->__add(";
+      this->generate(bexp->right());
+      this->implementation_ << ")";
       return;
     }
   }
@@ -316,14 +455,14 @@ void vds::cpp_generator::generate(const vexpression * exp)
   auto pexp = dynamic_cast<const vproperty_expression *>(exp);
   if (nullptr != pexp) {
     this->generate(pexp->object());
-    this->implementation_ << ".get_" << pexp->name() << "()";
+    this->implementation_ << "->get_" << pexp->name() << "()";
     return;
   }
 
   auto nexp = dynamic_cast<const vname_expression *>(exp);
   if (nullptr != nexp) {
     if ("this" == nexp->name()) {
-      this->implementation_ << "(*this)";
+      this->implementation_ << "pthis";
     }
     else {
       this->implementation_ << nexp->name();
@@ -336,20 +475,20 @@ void vds::cpp_generator::generate(const vexpression * exp)
   if (nullptr != prexp) {
     if ("!" == prexp->op()) {
       this->generate(prexp->right());
-      this->implementation_ << ".__not()";
+      this->implementation_ << "->__not()";
       return;
     }
   }
 
   auto strexp = dynamic_cast<const vstring_expression *>(exp);
   if (nullptr != strexp) {
-    this->implementation_ << "String::__create(\"" << strexp->value() << "\")";
+    this->implementation_ << "v_string::create(\"" << strexp->value() << "\")";
     return;
   }
 
   auto newexp = dynamic_cast<const vnew_object_expression *>(exp);
   if (nullptr != newexp) {
-    this->implementation_ << newexp->type()->name() << "::__create(";
+    this->implementation_ << " v_" << newexp->type()->name() << "_construct(";
     bool is_first = true;
     for (auto & arg : newexp->arguments()) {
       if (is_first) {
@@ -395,7 +534,7 @@ void vds::cpp_generator::generate_left(const vexpression * exp, const std::funct
   auto pexp = dynamic_cast<const vproperty_expression *>(exp);
   if (nullptr != pexp) {
     this->generate(pexp->object());
-    this->implementation_ << ".set_" << pexp->name() << "(";
+    this->implementation_ << "->set_" << pexp->name() << "(";
     right_callback();
     this->implementation_ << ")";
     return;
@@ -412,6 +551,18 @@ void vds::cpp_generator::generate_left(const vexpression * exp, const std::funct
 
 std::string vds::cpp_generator::struct_name(const std::unique_ptr<vds::vnamespace> &ns, const std::unique_ptr<vds::vclass> &cls) {
   return ns->name() + "_" + cls->name();
+}
+
+std::string vds::cpp_generator::struct_name(const std::unique_ptr<vds::vnamespace> &ns, const vtype* t) {
+  if(nullptr == t) {
+    return "void ";
+  }
+  if (0 == t->array_rank()) {
+    return ns->name() + "_" + t->name() + " * ";
+  }
+  else {
+    return ns->name() + "_" + t->name() + "_array * ";
+  }
 }
 
 std::string vds::cpp_generator::construct_name(const std::unique_ptr<vds::vnamespace> &ns,

@@ -31,7 +31,8 @@ namespace vds {
 
     static std::list<std::string> parse_name(const std::string & name);
 
-    void generate(const vclass * clss, const vmethod * m);
+    std::string method_name(const std::unique_ptr<vnamespace>& ns, const std::unique_ptr<vclass>& cls, const vmethod* vmethod);
+    void generate(const std::unique_ptr<vds::vnamespace> &ns, const std::unique_ptr<vclass> &cls, const vmethod * m);
 
     std::string print_type(const vtype * t);
 
@@ -42,6 +43,7 @@ namespace vds {
     void generate_left(const vexpression * exp, const std::function<void(void)> & right_callback);
 
     std::string struct_name(const std::unique_ptr<vnamespace> &ns, const std::unique_ptr<vclass> &cls);
+    std::string struct_name(const std::unique_ptr<vds::vnamespace> &ns, const vtype * t);
     std::string construct_name(const std::unique_ptr<vnamespace> &ns, const std::unique_ptr<vclass> &cls);
   };
 }
