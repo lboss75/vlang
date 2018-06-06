@@ -5,9 +5,15 @@ package vcompiler
 
 namespace v {
 
-	class member_info
+	class argument_info
 	{
+	  public property type : class_info;
+	  public property name : string;
+	}
 
+	class method_info
+	{
+		public property arguments : argument_info[];
 	}
 
 	class property_info
@@ -28,7 +34,7 @@ namespace v {
 		public property ns : namespace_info;
 		public property name : string;
 
-		public property members : member_info[];
+		public property methods : method_info[];
 		public property properties : property_info[];
 	}
 
@@ -157,6 +163,17 @@ namespace v {
 								right: new c_argument(
 									name: "new_value"
 								)));
+					}
+
+					foreach(var m in cls.methods){
+						var method = str.create_method(
+							name: m.name,
+							type: m.return_type
+						);
+
+						foreach(var arg in m.arguments){
+							method.add_argument(type: arg.type, name: arg.name);
+						}
 					}
 				}
 			}
